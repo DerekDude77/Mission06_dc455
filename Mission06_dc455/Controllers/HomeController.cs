@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mission06_dc455.Models;
 using System;
@@ -11,13 +12,11 @@ namespace Mission06_dc455.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private MovieApplicationContext _MovieContext { get; set; }
+        public MovieApplicationContext MovieContext { get; set; }
 
-        public HomeController(ILogger<HomeController> logger, MovieApplicationContext x)
+        public HomeController(MovieApplicationContext x)
         {
-            _logger = logger;
-            _MovieContext = x;
+            MovieContext = x;
         }
 
         public IActionResult Index()
@@ -33,21 +32,73 @@ namespace Mission06_dc455.Controllers
         [HttpGet]
         public IActionResult MovieApplication()
         {
+            ViewBag.Categories = MovieContext.Category.ToList();
+
             return View();
         }
 
         [HttpPost]
         public IActionResult MovieApplication(ApplicationResponse response)
         {
-            _MovieContext.Add(response);
-            _MovieContext.SaveChanges();
-            return View("Confirmation", response);
+            if(ModelState.IsValid)
+            {
+                MovieContext.Add(response);
+                MovieContext.SaveChanges();
+                return View("Confirmation", response);
+            }
+            else
+            {
+                ViewBag.Categories = MovieContext.Category.ToList();
+
+                return View(response);
+            }
+
+            
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult MovieTable()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var table = MovieContext.responses
+                .Include(x => x.Category)
+                .ToList();
+            // Where(x => x.(filter criteria) == (value))
+            // OrderBy(x => x.(ordered criteria))
+
+            return View(table);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int entryid)
+        {
+            ViewBag.Categories = MovieContext.Category.ToList();
+
+            var Movie = MovieContext.responses.Single(x => x.EntryID == entryid);
+
+            return View("MovieApplication", Movie);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(ApplicationResponse edit)
+        {
+            MovieContext.Update(edit);
+            MovieContext.SaveChanges();
+
+            return RedirectToAction("MovieTable");
+        }
+        [HttpGet]
+        public IActionResult Delete(int entryid)
+        {
+            var Movie = MovieContext.responses.Single(x => x.EntryID == entryid);
+            return View(Movie);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(ApplicationResponse response)
+        {
+            MovieContext.responses.Remove(response);
+            MovieContext.SaveChanges();
+
+            return RedirectToAction("MovieTable");
         }
     }
 }

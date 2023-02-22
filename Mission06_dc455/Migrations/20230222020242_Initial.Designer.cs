@@ -8,7 +8,7 @@ using Mission06_dc455.Models;
 namespace Mission06_dc455.Migrations
 {
     [DbContext(typeof(MovieApplicationContext))]
-    [Migration("20230214042209_Initial")]
+    [Migration("20230222020242_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +23,8 @@ namespace Mission06_dc455.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Director")
                         .IsRequired()
@@ -54,13 +53,15 @@ namespace Mission06_dc455.Migrations
 
                     b.HasKey("EntryID");
 
+                    b.HasIndex("CategoryID");
+
                     b.ToTable("responses");
 
                     b.HasData(
                         new
                         {
                             EntryID = 1,
-                            Category = "Action/Adventure",
+                            CategoryID = 1,
                             Director = "Peter Jackson",
                             Edited = false,
                             Notes = "Best battle ever!",
@@ -71,7 +72,7 @@ namespace Mission06_dc455.Migrations
                         new
                         {
                             EntryID = 2,
-                            Category = "Action/Adventure",
+                            CategoryID = 1,
                             Director = "Joe/Anthony Russo",
                             Edited = false,
                             Notes = "Dope movie",
@@ -82,7 +83,7 @@ namespace Mission06_dc455.Migrations
                         new
                         {
                             EntryID = 3,
-                            Category = "Action/Adventure",
+                            CategoryID = 1,
                             Director = "Martin Campbell",
                             Edited = false,
                             Notes = "GOAT",
@@ -90,6 +91,71 @@ namespace Mission06_dc455.Migrations
                             Title = "Casino Royale",
                             Year = 2006
                         });
+                });
+
+            modelBuilder.Entity("Mission06_dc455.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CategoryID");
+
+                    b.ToTable("Category");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryID = 1,
+                            CategoryName = "Action/Adventure"
+                        },
+                        new
+                        {
+                            CategoryID = 2,
+                            CategoryName = "Comedy"
+                        },
+                        new
+                        {
+                            CategoryID = 3,
+                            CategoryName = "Drama"
+                        },
+                        new
+                        {
+                            CategoryID = 4,
+                            CategoryName = "Family"
+                        },
+                        new
+                        {
+                            CategoryID = 5,
+                            CategoryName = "Horror/Suspense"
+                        },
+                        new
+                        {
+                            CategoryID = 6,
+                            CategoryName = "Miscellaneous"
+                        },
+                        new
+                        {
+                            CategoryID = 7,
+                            CategoryName = "Television"
+                        },
+                        new
+                        {
+                            CategoryID = 8,
+                            CategoryName = "VHS"
+                        });
+                });
+
+            modelBuilder.Entity("Mission06_dc455.Models.ApplicationResponse", b =>
+                {
+                    b.HasOne("Mission06_dc455.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
